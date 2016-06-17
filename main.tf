@@ -48,7 +48,7 @@ resource "aws_security_group" "shibidp" {
 }
 
 resource "template_file" "script" {
-  template = "shib-idp-install.sh"
+  template = "${file("${path.module}/shib-idp-install.sh")}"
 
   vars {
     "fqdn" = "${var.aws_r53_record_name}.${var.aws_r53_zone_domain}"
@@ -59,6 +59,18 @@ resource "template_file" "script" {
   }
 }
 
+resource "template_cloudinit_config" "config" {
+  gzip          = true
+  base64_encode = true
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = "${template_file.script.rendered}"
+  }
+}
+
+
+
 resource "aws_instance" "shibidp" {
   ami = "${var.aws_instance_ami}"
   instance_type = "${var.aws_instance_type}"
@@ -66,7 +78,7 @@ resource "aws_instance" "shibidp" {
   associate_public_ip_address = true
   ebs_optimized = false
   key_name = "${var.aws_keyname}"
-  user_data = "${template_file.script.rendered}"
+  user_data = "${template_cloudinit_config.config.rendered}"
   availability_zone = "${var.aws_availability_zone}"
 
   root_block_device {
