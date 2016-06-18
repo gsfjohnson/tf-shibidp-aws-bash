@@ -41,11 +41,12 @@ wget -c --no-cookies --no-check-certificate \
 
 yum -y localinstall /tmp/jdk-8u91-linux-x64.rpm
 
+echo export JAVA_HOME=/usr/java/jdk1.8.0_91 >> /etc/profile
 
 ##
 ## adjust JCE Policy to unlimited
 ##
-wget -nv -c --no-cookies --no-check-certificate \
+wget -q -c --no-cookies --no-check-certificate \
  --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
  "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" \
  --output-document="/tmp/jce_policy-8.zip"
@@ -53,13 +54,11 @@ wget -nv -c --no-cookies --no-check-certificate \
 unzip /tmp/jce_policy-8.zip -d /opt
 cp -f /opt/UnlimitedJCEPolicyJDK8/*jar /usr/java/jdk1.8.0_91/jre/lib/security/
 
-#echo export JAVA_HOME=/opt/java >>/etc/profile
-
 ##
 ## install jetty
 ##
 fn="jetty-distribution-9.3.9.v20160517"
-wget -nv -c --no-cookies --no-check-certificate \
+wget -q -c --no-cookies --no-check-certificate \
   "http://eclipse.org/downloads/download.php?file=/jetty/stable-9/dist/$fn.tar.gz&r=1" \
   --output-document="/tmp/$fn.tar.gz"
 
@@ -99,3 +98,14 @@ EOFEOF
 cat /etc/default/jetty
 
 #service jetty start
+
+##
+## install shibboleth-identity-provider
+##
+ver="3.2.1"
+fn="shibboleth-identity-provider-$ver"
+wget -q -c --no-cookies --no-check-certificate \
+  "https://shibboleth.net/downloads/identity-provider/3.2.1/$fn.tar.gz" \
+  --output-document="/tmp/$fn.tar.gz"
+
+tar xzf /tmp/$fn.tar.gz -C /opt
